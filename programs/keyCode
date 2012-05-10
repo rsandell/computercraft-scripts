@@ -1,0 +1,8 @@
+term.clear()
+term.setCursorPos(1,1)
+print("+-- Key Testing Utility 0.7b --+")
+while true do
+  act, key = os.pullEvent("key")
+  print("Your Keycode is: "..key)
+
+end
