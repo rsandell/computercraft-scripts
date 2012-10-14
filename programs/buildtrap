@@ -1,0 +1,170 @@
+--
+-- The MIT License
+--
+-- Copyright 2012 Robert Sandell. All rights reserved.
+--
+-- Permission is hereby granted, free of charge, to any person obtaining a copy
+-- of this software and associated documentation files (the "Software"), to deal
+-- in the Software without restriction, including without limitation the rights
+-- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+-- copies of the Software, and to permit persons to whom the Software is
+-- furnished to do so, subject to the following conditions:
+--
+-- The above copyright notice and this permission notice shall be included in
+-- all copies or substantial portions of the Software.
+--
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+-- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+-- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+-- THE SOFTWARE.
+--
+
+--
+-- Turtle program that builds a number of mobtrap sections.
+-- Seen from the side:
+--
+-- CCCC
+-- PTCC
+--SRCTC
+--CCCCC
+--------
+--Each section is built on the right side of the next.
+--The program does not check for fuel.
+--
+
+
+--1 to 4 = Cobble
+COBBLE_START=1
+COBBLE_END=4
+REDSTONE_TORCH=8
+REPEATER=7
+PISTON=5
+PREASSURE_PLATE=6
+
+function selectCobble()
+  for i=COBBLE_START,COBBLE_END,1 do
+    if turtle.getItemCount(i) > 0 then
+       turtle.select(i)
+       return true
+    end
+  end
+  print("Out of cobble!")
+  return false
+end
+
+
+function buildSection()
+  if selectCobble() then
+     turtle.up()
+     for i=1,4,1 do
+       if i ~= 4 then
+         turtle.placeDown()
+       end
+       turtle.forward()
+     end
+     turtle.placeDown()
+     if selectCobble() then
+         turtle.up()
+         turtle.back()
+         turtle.back()
+         turtle.place()
+         turtle.back()
+         turtle.select(REDSTONE_TORCH)
+         turtle.place()
+         turtle.down()
+         turtle.turnRight()
+         turtle.turnRight()
+         turtle.back()
+         turtle.back()
+         if selectCobble() then
+           turtle.place()
+           turtle.back()
+           turtle.select(REDSTONE_TORCH)
+           turtle.place()
+           if selectCobble() then
+             turtle.up()
+             turtle.placeDown()
+             turtle.up()
+             turtle.placeDown()
+             for i=1,3,1 do
+               turtle.forward()
+             end
+             turtle.down()
+             turtle.turnRight()
+             turtle.turnRight()
+             turtle.select(REPEATER)
+             turtle.placeDown()
+             turtle.back()
+             turtle.select(PISTON)
+             turtle.place()
+             turtle.select(PREASSURE_PLATE)
+             turtle.placeDown()
+             turtle.turnRight()
+             turtle.forward()
+             turtle.down()
+             turtle.down()
+             turtle.turnLeft()
+             for i=1,3,1 do
+               turtle.forward()
+             end
+             turtle.turnLeft()
+             if selectCobble() then
+               turtle.place()
+               for i =1,3,1 do
+                 turtle.up()
+               end
+               turtle.forward()
+               turtle.turnRight()
+               if selectCobble() then
+                 for i = 1,4,1 do
+                   turtle.place()
+                   if i ~= 4 then
+                     turtle.back()
+                   end
+                 end
+                 turtle.turnRight()
+                 turtle.forward()
+                 for i = 1,3,1 do
+                   turtle.down()
+                 end
+                 turtle.turnLeft()
+                 return true
+               else
+                 return false
+               end
+             else
+               return false
+             end
+           else
+             return false
+           end
+         else
+           return false
+         end
+     else
+       return false
+     end
+  else
+    return false
+  end
+end
+
+local length = 1
+
+local tArgs = { ... }
+if #tArgs >= 1 then
+  length = tonumber(tArgs[1])
+  if length < 1 then
+	print( "Length must be positive" )
+	return
+  end
+end
+for i = 1,length,1 do
+  if not buildSection() then
+    print("Cannot continue!")
+    break
+  end
+end
