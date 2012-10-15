@@ -1,0 +1,83 @@
+--
+-- The MIT License
+--
+-- Copyright 2012 Robert Sandell. All rights reserved.
+--
+-- Permission is hereby granted, free of charge, to any person obtaining a copy
+-- of this software and associated documentation files (the "Software"), to deal
+-- in the Software without restriction, including without limitation the rights
+-- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+-- copies of the Software, and to permit persons to whom the Software is
+-- furnished to do so, subject to the following conditions:
+--
+-- The above copyright notice and this permission notice shall be included in
+-- all copies or substantial portions of the Software.
+--
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+-- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+-- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+-- THE SOFTWARE.
+--
+
+--
+-- Turtle program that builds a wall x wide untill something stops it from going further down.
+-- Seen from the side:
+
+function selectCobble(ammount)
+  for i=1,15,1 do
+    if turtle.getItemCount(i) >= ammount then
+       turtle.select(i)
+       return true
+    end
+  end
+  print("Out of cobble!")
+  return false
+end
+
+function buildLine(length)
+  --assume we have the correct position
+  if not selectCobble(length) then
+     return false
+  end
+  for i=1,length-1,1 do
+      turtle.back()
+      turtle.place()
+  end
+  if not turtle.detectDown() then
+    turtle.down()
+    turtle.placeUp()
+    turtle.turnRight()
+    turtle.turnRight()
+    return true
+  else
+    if turtle.back() then
+       turtle.place()
+    end
+    print("Done")
+    return false
+  end
+end
+
+local length = 1
+
+local tArgs = { ... }
+if #tArgs >= 1 then
+  length = tonumber(tArgs[1])
+  if length < 1 then
+	print( "Length must be positive" )
+	return
+  end
+else
+    print("Usage: topdownwall length")
+    return
+end
+
+turtle.turnRight()
+turtle.turnRight()
+
+while buildLine(length) do
+  print("Continue")
+end
