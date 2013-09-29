@@ -1,0 +1,236 @@
+--
+-- The MIT License
+--
+-- Copyright 2013 FunshineX, Robert Sandell. All rights reserved.
+--
+-- Permission is hereby granted, free of charge, to any person obtaining a copy
+-- of this software and associated documentation files (the "Software"), to deal
+-- in the Software without restriction, including without limitation the rights
+-- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+-- copies of the Software, and to permit persons to whom the Software is
+-- furnished to do so, subject to the following conditions:
+--
+-- The above copyright notice and this permission notice shall be included in
+-- all copies or substantial portions of the Software.
+--
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+-- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+-- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+-- THE SOFTWARE.
+--
+
+--
+-- Code challenge from FunshineX Unleashed in Space - Episode 27
+-- https://www.youtube.com/watch?v=VMl86Si56jk
+--
+-- Energy Cell Monitoring/Control system for 8 cells on one 5x3 monitor.
+-- This is the version with a more cool gray,cyan,magenta color theme.
+--
+-- Original code by FunshineX: http://pastebin.com/Hf3x2Ztg
+--
+
+ENG_THRESHOLD_START = 50
+ENG_THRESHOLD_STOP = 90
+
+data = {}
+
+data[1] = {}
+data[1].periph = peripheral.wrap("redstone_energy_cell_0")
+data[1].color =  colors.white
+data[1].curState = 0
+data[1].anim = 0
+
+data[2] = {}
+data[2].periph = peripheral.wrap("redstone_energy_cell_1")
+data[2].color = colors.pink
+data[2].curState = 0
+data[2].anim = 0
+
+data[3] = {}
+data[3].periph = peripheral.wrap("redstone_energy_cell_2")
+data[3].color = colors.yellow
+data[3].curState = 0
+data[3].anim = 0
+
+data[4] = {}
+data[4].periph = peripheral.wrap("redstone_energy_cell_3")
+data[4].color = colors.magenta
+data[4].curState = 0
+data[4].anim = 0
+
+data[5] = {}
+data[5].periph = peripheral.wrap("redstone_energy_cell_4")
+data[5].color = colors.orange
+data[5].curState = 0
+data[5].anim = 0
+
+data[6] = {}
+data[6].periph = peripheral.wrap("redstone_energy_cell_5")
+data[6].color = colors.gray
+data[6].curState = 0
+data[6].anim = 0
+
+data[7] = {}
+data[7].periph = peripheral.wrap("redstone_energy_cell_6")
+data[7].color = colors.lime
+data[7].curState = 0
+data[7].anim = 0
+
+data[8] = {}
+data[8].periph = peripheral.wrap("redstone_energy_cell_7")
+data[8].color = colors.lightBlue
+data[8].curState = 0
+data[8].anim = 0
+
+monitor = peripheral.wrap("monitor_1")
+monitor.setTextScale(1)
+moninf = {}
+moninf.w, moninf.h = monitor.getSize()
+BARS_START = moninf.h-4
+
+function getProviders()
+  for i,d in ipairs(data) do
+     if d.cell ~= nil then
+       d.prevVal = d.cell.energyStored
+     else
+       d.prevVal = 0
+     end
+     d.cell = d.periph.getPowerProvider()
+     d.percentage = d.cell.energyStored/d.cell.maxEnergyStored*100
+     d.gain = d.cell.energyStored - d.prevVal
+  end
+end
+
+function writeBarGraph(cellNum, value, state)
+   term.write("Cell "..cellNum..": [")
+
+   w,h = term.getCursorPos()
+   term.write(string.rep(".",20).."]  "..state.."  "..math.floor(value))
+
+   term.setCursorPos(w,h)
+   term.write(string.rep("*",value/5))
+
+end
+
+function writeStatus()
+  term.clear()
+  for i,d in ipairs(data) do
+      term.setCursorPos(1,i+1)
+      writeBarGraph(""..i, d.percentage, d.curState)
+  end
+end
+
+function setOutput()
+  curColors = 0
+  for i,d in ipairs(data) do
+      if d.percentage < ENG_THRESHOLD_START then
+          d.curState = 1
+          curColors = curColors + d.color
+      elseif d.percentage > ENG_THRESHOLD_STOP then
+          d.curState = 0
+      end
+  end
+  rs.setBundledOutput("right", curColors)
+end
+
+function isBar(percentage, level)
+  local height = (BARS_START - 1)*(percentage/100)
+  local enough = ((BARS_START - 1) - level) <= height
+  return enough
+end
+
+function checkAnim(level, d)
+  if d.curState <= 0 then
+    return false
+  end
+  local start = math.floor((BARS_START+1) / 2) + 1
+  --print("Start: "..start)
+  if level == BARS_START then  --cycle the animation once per bar
+    d.anim = (d.anim + 1) % (start - 1)
+    --print("Anim: "..d.anim)
+  end
+  if level >= start-d.anim and level <= start+d.anim then
+    return true
+  else
+    return false
+  end
+end
+
+function updateMonitor()
+  monitor.clear()
+  spacing = (moninf.w - 5) / #data
+  halfSpacing = spacing / 2
+  for i,d in ipairs(data) do
+    xPos = 5 + halfSpacing + ((i-1)*spacing)
+    --print("xPos: "..xPos)
+    --print("State: "..d.curState)
+    level = BARS_START
+
+    monitor.setBackgroundColor(colors.lightGray)
+    monitor.setCursorPos(xPos-1, 1)
+    monitor.write("   ")
+    monitor.setCursorPos(xPos-1, BARS_START + 1)
+    monitor.setTextColor(colors.black)
+    monitor.write(monitor.write(string.format("%03d", d.percentage)))
+    monitor.setTextColor(d.color)
+    while level > 1 do
+      if (d.curState <= 0 or checkAnim(level, d)) then
+        monitor.setCursorPos(xPos-1, level)
+        monitor.setBackgroundColor(colors.lightGray)
+        monitor.write(" ")
+        monitor.setBackgroundColor(colors.black)
+        monitor.write(" ")
+        monitor.setBackgroundColor(colors.lightGray)
+        monitor.write(" ")
+      end
+
+      monitor.setBackgroundColor(colors.black)
+      if isBar(d.percentage, level) then
+        monitor.setCursorPos(xPos, level)
+        if d.percentage < ENG_THRESHOLD_START then
+          monitor.setBackgroundColor(colors.magenta)
+        elseif d.percentage > ENG_THRESHOLD_STOP then
+          monitor.setBackgroundColor(colors.cyan)
+        else
+          monitor.setBackgroundColor(colors.cyan)
+        end
+        monitor.write(" ")
+      end
+      level = level - 1
+    end
+    monitor.setBackgroundColor(colors.black)
+
+    if i % 2 == 0 then
+      monitor.setCursorPos(xPos-2, BARS_START + 3)
+    else
+      monitor.setCursorPos(xPos-2, BARS_START + 4)
+    end
+    monitor.write(string.format("%05d", d.gain))
+  end
+  monitor.setTextColor(colors.white)
+  monitor.setBackgroundColor(colors.black)
+  monitor.setCursorPos(1, BARS_START + 3)
+  monitor.write("Gain:")
+end
+
+function controlThread()
+  while true do
+    getProviders()
+    writeStatus()
+    setOutput()
+
+    sleep(2)
+  end
+end
+
+function monitorThread()
+  while true do
+    sleep(0.5)
+    updateMonitor()
+  end
+end
+
+parallel.waitForAny(controlThread, monitorThread)
