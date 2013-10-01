@@ -35,7 +35,7 @@
 ENG_THRESHOLD_START = 50
 ENG_THRESHOLD_STOP = 90
 
-AVERAGE_GAIN_SAMPLE_SIZE = 5
+AVERAGE_GAIN_SAMPLE_SIZE = 3
 
 data = {}
 
@@ -43,59 +43,84 @@ data[1] = {
   periph   = peripheral.wrap("redstone_energy_cell_0"),
   color    = colors.white,
   curState = 0,
-  anim     = 0
+  anim     = 0,
+  gain     = 0,
+  samples  = {},
+  prevVal  = 0
 }
 
 data[2] = {
   periph   = peripheral.wrap("redstone_energy_cell_1"),
   color    = colors.pink,
   curState = 0,
-  anim     = 0
+  anim     = 0,
+  gain     = 0,
+  samples  = {},
+  prevVal  = 0
 }
 
 data[3] = {
-  periph = peripheral.wrap("redstone_energy_cell_2"),
-  color = colors.yellow,
+  periph   = peripheral.wrap("redstone_energy_cell_2"),
+  color    = colors.yellow,
   curState = 0,
-  anim = 0
+  anim     = 0,
+  gain     = 0,
+  samples  = {},
+  prevVal  = 0
 }
 
 data[4] = {
   periph   = peripheral.wrap("redstone_energy_cell_3"),
   color    = colors.magenta,
   curState = 0,
-  anim     = 0
+  anim     = 0,
+  gain     = 0,
+  samples  = {},
+  prevVal  = 0
 }
 
 data[5] = {
   periph   = peripheral.wrap("redstone_energy_cell_4"),
   color    = colors.orange,
   curState = 0,
-  anim     = 0
+  anim     = 0,
+  gain     = 0,
+  samples  = {},
+  prevVal  = 0
 }
 
 data[6] = {
   periph   = peripheral.wrap("redstone_energy_cell_5"),
   color    = colors.gray,
   curState = 0,
-  anim     = 0
+  anim     = 0,
+  gain     = 0,
+  samples  = {},
+  prevVal  = 0
 }
 
 data[7] = {
   periph   = peripheral.wrap("redstone_energy_cell_6"),
   color    = colors.lime,
   curState = 0,
-  anim     = 0
+  anim     = 0,
+  gain     = 0,
+  samples  = {},
+  prevVal  = 0
 }
 
 data[8] = {
   periph   = peripheral.wrap("redstone_energy_cell_7"),
   color    = colors.lightBlue,
   curState = 0,
-  anim     = 0
+  anim     = 0,
+  gain     = 0,
+  samples  = {},
+  prevVal  = 0
 }
 
 monitor = peripheral.wrap("monitor_1")
+monitor.clear() -- A clear on startup shouldn't hurt
 monitor.setTextScale(1)
 moninf = {}
 moninf.w, moninf.h = monitor.getSize()
@@ -105,12 +130,24 @@ function getProviders()
   for i,d in ipairs(data) do
      if d.cell ~= nil then
        d.prevVal = d.cell.energyStored
-     else
-       d.prevVal = 0
      end
      d.cell = d.periph.getPowerProvider()
      d.percentage = d.cell.energyStored/d.cell.maxEnergyStored*100
-     d.gain = d.cell.energyStored - d.prevVal
+
+     --Calculate the gain
+     local curGain = d.cell.energyStored - d.prevVal
+     table.insert(d.samples, curGain)
+     local sampleSize = #d.samples
+     if sampleSize >= AVERAGE_GAIN_SAMPLE_SIZE then
+       local sum = 0
+       for i,v in ipairs(d.samples) do
+         sum = sum + v
+       end
+       d.gain = sum / sampleSize
+       d.samples = {}
+     elseif sampleSize == 1 and d.gain == 0 and curGain ~= 0 then --avoid some latency during startup
+       d.gain = curGain
+     end
   end
 end
 
@@ -220,7 +257,7 @@ function updateMonitor()
     else
       monitor.setCursorPos(xPos-2, BARS_START + 4)
     end
-    monitor.write(string.format("%05d", d.gain))
+    monitor.write(string.format("%05d   ", d.gain))
   end
   monitor.setTextColor(colors.white)
   monitor.setBackgroundColor(colors.black)
