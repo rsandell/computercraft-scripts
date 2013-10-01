@@ -35,55 +35,65 @@
 ENG_THRESHOLD_START = 50
 ENG_THRESHOLD_STOP = 90
 
+AVERAGE_GAIN_SAMPLE_SIZE = 5
+
 data = {}
 
-data[1] = {}
-data[1].periph = peripheral.wrap("redstone_energy_cell_0")
-data[1].color =  colors.white
-data[1].curState = 0
-data[1].anim = 0
+data[1] = {
+  periph   = peripheral.wrap("redstone_energy_cell_0"),
+  color    = colors.white,
+  curState = 0,
+  anim     = 0
+}
 
-data[2] = {}
-data[2].periph = peripheral.wrap("redstone_energy_cell_1")
-data[2].color = colors.pink
-data[2].curState = 0
-data[2].anim = 0
+data[2] = {
+  periph   = peripheral.wrap("redstone_energy_cell_1"),
+  color    = colors.pink,
+  curState = 0,
+  anim     = 0
+}
 
-data[3] = {}
-data[3].periph = peripheral.wrap("redstone_energy_cell_2")
-data[3].color = colors.yellow
-data[3].curState = 0
-data[3].anim = 0
+data[3] = {
+  periph = peripheral.wrap("redstone_energy_cell_2"),
+  color = colors.yellow,
+  curState = 0,
+  anim = 0
+}
 
-data[4] = {}
-data[4].periph = peripheral.wrap("redstone_energy_cell_3")
-data[4].color = colors.magenta
-data[4].curState = 0
-data[4].anim = 0
+data[4] = {
+  periph   = peripheral.wrap("redstone_energy_cell_3"),
+  color    = colors.magenta,
+  curState = 0,
+  anim     = 0
+}
 
-data[5] = {}
-data[5].periph = peripheral.wrap("redstone_energy_cell_4")
-data[5].color = colors.orange
-data[5].curState = 0
-data[5].anim = 0
+data[5] = {
+  periph   = peripheral.wrap("redstone_energy_cell_4"),
+  color    = colors.orange,
+  curState = 0,
+  anim     = 0
+}
 
-data[6] = {}
-data[6].periph = peripheral.wrap("redstone_energy_cell_5")
-data[6].color = colors.gray
-data[6].curState = 0
-data[6].anim = 0
+data[6] = {
+  periph   = peripheral.wrap("redstone_energy_cell_5"),
+  color    = colors.gray,
+  curState = 0,
+  anim     = 0
+}
 
-data[7] = {}
-data[7].periph = peripheral.wrap("redstone_energy_cell_6")
-data[7].color = colors.lime
-data[7].curState = 0
-data[7].anim = 0
+data[7] = {
+  periph   = peripheral.wrap("redstone_energy_cell_6"),
+  color    = colors.lime,
+  curState = 0,
+  anim     = 0
+}
 
-data[8] = {}
-data[8].periph = peripheral.wrap("redstone_energy_cell_7")
-data[8].color = colors.lightBlue
-data[8].curState = 0
-data[8].anim = 0
+data[8] = {
+  periph   = peripheral.wrap("redstone_energy_cell_7"),
+  color    = colors.lightBlue,
+  curState = 0,
+  anim     = 0
+}
 
 monitor = peripheral.wrap("monitor_1")
 monitor.setTextScale(1)
