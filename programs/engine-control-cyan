@@ -128,10 +128,10 @@ function setOutput()
   for i,d in ipairs(data) do
       if d.percentage < ENG_THRESHOLD_START then
           d.curState = 1
-          curColors = curColors + d.color
       elseif d.percentage > ENG_THRESHOLD_STOP then
           d.curState = 0
       end
+      curColors = curColors + (d.color * d.curState) -- set the color based on state, not based on current percent
   end
   rs.setBundledOutput("right", curColors)
 end
