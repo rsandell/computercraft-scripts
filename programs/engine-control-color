@@ -160,7 +160,6 @@ function checkAnim(level, d)
 end
 
 function updateMonitor()
-  monitor.clear()
   spacing = (moninf.w - 5) / #data
   halfSpacing = spacing / 2
   for i,d in ipairs(data) do
@@ -177,14 +176,17 @@ function updateMonitor()
     monitor.write(monitor.write(string.format("%03d", d.percentage)))
     monitor.setTextColor(d.color)
     while level > 1 do
+      monitor.setCursorPos(xPos-1, level)
       if (d.curState <= 0 or checkAnim(level, d)) then
-        monitor.setCursorPos(xPos-1, level)
         monitor.setBackgroundColor(d.color)
         monitor.write(" ")
         monitor.setBackgroundColor(colors.black)
         monitor.write(" ")
         monitor.setBackgroundColor(d.color)
         monitor.write(" ")
+      else
+        monitor.setBackgroundColor(colors.black)
+        monitor.write("   ")
       end
 
       monitor.setBackgroundColor(colors.black)
